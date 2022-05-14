@@ -1,0 +1,332 @@
+#Install packages
+install.packages("NbClust") 
+install.packages("factoextra")
+install.packages("ClusterR")
+install.packages("cluster")
+install.packages("readxl")
+install.packages("caret")
+install.packages("devtools")
+
+#Loading packages
+library(readxl)
+library(ClusterR)
+library(cluster)
+library(NbClust)
+library(factoextra)
+library(caret)
+library(devtools)
+
+#https://www.datacamp.com/tutorial/pca-analysis-r
+install_github("vqv/ggbiplot")
+library(ggbiplot)
+
+#Importing dataset 
+#https://www.statmethods.net/input/importingdata.html
+Whitewine_v2 <- read_excel("E:\\IIT\\2nd Year\\Machine Learning and Data Mining\\CourseWork\\w1837849_20200870_5DATA002W_CW\\Part1\\Part1\\Whitewine_v2.xlsx")
+View(Whitewine_v2)
+boxplot(Whitewine_v2)
+
+#Replace blanks in column names with a dot
+names(Whitewine_v2) <- make.names(names(Whitewine_v2), unique = TRUE)
+names(Whitewine_v2)
+
+#Checking outliers of every column
+checked <- Whitewine_v2$fixed.acidity
+boxplot(checked)
+
+checked <- Whitewine_v2$volatile.acidity
+boxplot(checked)
+
+checked <- Whitewine_v2$citric.acid
+boxplot(checked)
+
+checked <- Whitewine_v2$residual.sugar
+boxplot(checked)
+
+checked <- Whitewine_v2$chlorides
+boxplot(checked)
+
+checked <- Whitewine_v2$free.sulfur.dioxide
+boxplot(checked)
+
+checked <- Whitewine_v2$total.sulfur.dioxide
+boxplot(checked)
+
+checked <- Whitewine_v2$density
+boxplot(checked)
+
+checked <- Whitewine_v2$pH
+boxplot(checked)
+
+checked <- Whitewine_v2$sulphates
+boxplot(checked)
+
+checked <- Whitewine_v2$alcohol
+boxplot(checked)
+
+summary(Whitewine_v2) #Summary 
+
+#Removing outliers 
+#Referred to https://www.r-bloggers.com/2021/09/how-to-remove-outliers-in-r-3/
+#Fixed acidity
+IQR_fixed_acidity = 7.3 - 6.3
+Uppfen_fixed_acidity = 7.3 + 1.5 * IQR_fixed_acidity #Upper fence
+Uppfen_fixed_acidity
+
+Lowfen_fixed_acidity = 6.3 - 1.5 * IQR_fixed_acidity #Lower fence
+Lowfen_fixed_acidity
+
+#Volatile acidity
+IQR_volatile_acidity = 0.32 - 0.21
+Uppfen_volatile_acidity = 0.32 + 1.5 * IQR_volatile_acidity #Upper fence
+Uppfen_volatile_acidity
+
+Lowfen_volatile_acidity = 0.21 - 1.5 * IQR_volatile_acidity #Lower fence
+Lowfen_volatile_acidity
+
+#Citric acid
+IQR_citric_acid = 0.39 - 0.27
+Uppfen_citric_acid = 0.39 + 1.5 * IQR_citric_acid #Upper fence
+Uppfen_citric_acid
+
+Lowfen_citric_acid = 0.27 - 1.5 * IQR_citric_acid #Lower fence
+Lowfen_citric_acid
+
+#Residual sugar
+IQR_residual_sugar = 10 - 1.7
+Uppfen_residual_sugar = 10 + 1.5 * IQR_residual_sugar #Upper fence
+Uppfen_residual_sugar
+
+Lowfen_residual_sugar = 1.7 - 1.5 * IQR_residual_sugar #Lower fence
+Lowfen_residual_sugar
+
+#Chlorides
+IQR_chlorides = 0.05 - 0.036
+Uppfen_chlorides = 0.05 + 1.5 * IQR_chlorides #Upper fence
+Uppfen_chlorides
+
+Lowfen_chlorides = 0.036 - 1.5 * IQR_chlorides #Lower fence
+Lowfen_chlorides
+
+#Free sulphur dioxide
+IQR_free_sulphur_dioxide = 46 - 24
+Uppfen_free_sulphur_dioxide = 46 + 1.5 * IQR_free_sulphur_dioxide #Upper fence
+Uppfen_free_sulphur_dioxide
+
+Lowfen_free_sulphur_dioxide = 24 - 1.5 * IQR_free_sulphur_dioxide #Lower fence
+Lowfen_free_sulphur_dioxide
+
+#Total sulphur dioxide
+IQR_total_sulphur_dioxide = 167 - 109
+Uppfen_total_sulphur_dioxide = 167 + 1.5 * IQR_total_sulphur_dioxide #Upper fence
+Uppfen_total_sulphur_dioxide
+
+Lowfen_total_sulphur_dioxide = 109 - 1.5 * IQR_total_sulphur_dioxide #Lower fence
+Lowfen_total_sulphur_dioxide
+
+#Density
+IQR_density = 0.9961  - 0.9917
+Uppfen_density = 0.9961  + 1.5 * IQR_density #Upper fence
+Uppfen_density
+
+Lowfen_density = 0.9917  - 1.5 * IQR_density #Lower fence
+Lowfen_density
+
+#PH
+IQR_PH = 3.28 - 3.09
+Uppfen_PH = 3.28 + 1.5 * IQR_PH #Upper fence
+Uppfen_PH
+
+Lowfen_PH = 3.09 - 1.5 * IQR_PH #Lower fence
+Lowfen_PH
+
+#Sulphates
+IQR_sulphates = 0.55 - 0.41
+Uppfen_sulphates = 0.55 + 1.5 * IQR_sulphates #Upper fence
+Uppfen_sulphates
+
+Lowfen_sulphates = 0.41 - 1.5 * IQR_sulphates #Lower fence
+Lowfen_sulphates
+
+#Alcohol
+IQR_alcohol = 11.4 - 9.5
+Uppfen_alcohol = 11.4 + 1.5 * IQR_alcohol #Upper fence
+Uppfen_alcohol
+
+Lowfen_alcohol = 9.5 - 1.5 * IQR_alcohol #Lower fence
+Lowfen_alcohol
+
+boxplot(Whitewine_v2)
+
+#Removing outliers
+no_outliers = subset(Whitewine_v2, fixed.acidity <= 8.8 & fixed.acidity >= 4.8 &
+                      volatile.acidity <= 0.485 & volatile.acidity >= 0.045 &
+                       citric.acid <= 0.57 & citric.acid >= 0.09 & 
+                       residual.sugar <= 22.45 & residual.sugar >= -10.75  &
+                      chlorides <= 0.071 & chlorides >= 0.015 &
+                      free.sulfur.dioxide <= 79 & free.sulfur.dioxide >= -9 &
+                       total.sulfur.dioxide <= 254 & total.sulfur.dioxide >= 22 &
+                      density <= 1.0027 & density >= 0.9851 &
+                      pH <= 3.565 & pH >= 2.805 &
+                      sulphates <= 0.76 & sulphates >= 0.2 &
+                       alcohol <= 14.25 & alcohol >= 6.65)
+
+boxplot(no_outliers)
+View(no_outliers)
+head(no_outliers)
+print(dim(Whitewine_v2))
+print(dim(no_outliers))
+
+#Scaling 
+# Min-Max Normalization
+normalize <- function(x) {
+  return ((x - min(x)) / (max(x) - min(x)))
+}
+dataNorm <- as.data.frame(lapply(no_outliers, normalize))
+boxplot(dataNorm)
+print(dim(no_outliers))
+print(dim(dataNorm))
+
+#Clustering 
+#https://www.rdocumentation.org/packages/NbClust/versions/3.0/topics/NbClust
+#set.seed(26)
+clusterNo=NbClust(dataNorm,distance="euclidean", min.nc=2,max.nc=10,method="kmeans",index="all")
+
+#Elbow method 
+#https://www.datanovia.com/en/lessons/determining-the-optimal-number-of-clusters-3-must-know-methods/
+k=2:10
+WSS=sapply(k,function(k){kmeans (dataNorm, centers = k)$tot.withinss})
+plot(k, WSS, type="l", xlab= "Number of k", ylab="Within sum of squares")
+
+#Silhouette method 
+#https://www.datanovia.com/en/lessons/determining-the-optimal-number-of-clusters-3-must-know-methods/
+fviz_nbclust(dataNorm, kmeans, method = "silhouette")+labs(subtitle = "Silhouette method")
+
+#Analysis for each k attempts 
+#https://www.datanovia.com/en/blog/k-means-clustering-visualization-in-r-step-by-step-guide/
+#for k = 2
+kmeansAna <- kmeans(dataNorm, centers = 2, nstart = 20)
+kmeansAna
+kmeansAna$withinss
+kmeansAna$totss
+kmeansAna$betweenss
+fviz_cluster(kmeansAna, data = dataNorm)
+kmeansAna$cluster
+conMat <- table(dataNorm$quality, kmeansAna$cluster)
+print(conMat)
+columnA<-factor(dataNorm$quality)
+qualityA<-as.numeric(columnA)
+confusionMatrix(data=as.factor(c(as.factor(kmeansAna$cluster))), reference=as.factor(qualityA))
+
+#for k = 3
+kmeansAna <- kmeans(dataNorm, centers = 3, nstart = 20)
+kmeansAna
+kmeansAna$withinss
+kmeansAna$totss
+kmeansAna$betweenss
+fviz_cluster(kmeansAna, data = dataNorm)
+kmeansAna$cluster
+conMat <- table(dataNorm$quality, kmeansAna$cluster)
+print(conMat)
+columnB<-factor(dataNorm$quality)
+qualityB<-as.numeric(columnB)
+confusionMatrix(data=as.factor(c(as.factor(kmeansAna$cluster))), reference=as.factor(qualityB))
+
+#for k = 4
+kmeansAna <- kmeans(dataNorm, centers = 4, nstart = 20)
+kmeansAna
+kmeansAna$withinss
+kmeansAna$totss
+kmeansAna$betweenss
+fviz_cluster(kmeansAna, data = dataNorm)
+kmeansAna$cluster
+conMat <- table(dataNorm$quality, kmeansAna$cluster)
+print(conMat)
+columnC<-factor(dataNorm$quality)
+qualityC<-as.numeric(columnC)
+confusionMatrix(data=as.factor(c(as.factor(kmeansAna$cluster))), reference=as.factor(qualityC))
+
+
+#Principle Component Analysis(PCA)
+#https://medium.com/@zullinira23/implementation-of-principal-component-analysis-pca-on-k-means-clustering-in-r-794f03ec15f
+WhitewinePCA <- prcomp(Whitewine_v2[,c(1:11)], center = TRUE,scale. = TRUE)
+summary(WhitewinePCA)
+ggbiplot(WhitewinePCA)
+
+#Apply kmeans to principle component analysis data set
+#Removing outliers 
+WinePCA = Whitewine_v2[9:12]
+print(WinePCA)
+boxplot(WinePCA)
+
+#Checking the values
+checked <- WinePCA$pH
+boxplot(checked)
+
+checked <- WinePCA$sulphates
+boxplot(checked)
+
+checked <- WinePCA$alcohol
+boxplot(checked)
+
+summary(WinePCA) #Summary 
+
+#PH
+IQR_PH = 3.28 - 3.09
+Uppfen_PH = 3.28 + 1.5 * IQR_PH #Upper fence
+Uppfen_PH
+
+Lowfen_PH = 3.09 - 1.5 * IQR_PH #Lower fence
+Lowfen_PH
+
+#Sulphates
+IQR_sulphates = 0.55 - 0.41
+Uppfen_sulphates = 0.55 + 1.5 * IQR_sulphates #Upper fence
+Uppfen_sulphates
+
+Lowfen_sulphates = 0.41 - 1.5 * IQR_sulphates #Lower fence
+Lowfen_sulphates
+
+#Alcohol
+IQR_alcohol = 11.4 - 9.5
+Uppfen_alcohol = 11.4 + 1.5 * IQR_alcohol #Upper fence
+Uppfen_alcohol
+
+Lowfen_alcohol = 9.5 - 1.5 * IQR_alcohol #Lower fence
+Lowfen_alcohol
+
+
+#Removing outliers
+no_outliersPCA = subset(WinePCA,  pH <= 3.565 & pH >= 2.805 &
+                          sulphates <= 0.76 & sulphates >= 0.2 &
+                          alcohol <= 14.25 & alcohol >= 6.65)
+boxplot(no_outliersPCA)
+View(no_outliersPCA)
+
+#Normalization for PCA
+normalizePCA <- function(x) {
+  return ((x - min(x)) / (max(x) - min(x)))
+}
+dataNormPCA <- as.data.frame(lapply(no_outliersPCA, normalizePCA))
+boxplot(dataNormPCA)
+
+print(dim(WinePCA))
+print(dim(no_outliersPCA))
+print(dim(dataNormPCA))
+
+#Clustering with PCA for k=2
+kmeansAnaPCA <- kmeans(dataNormPCA, centers = 2, nstart = 20)
+kmeansAnaPCA
+kmeansAnaPCA$withinss
+kmeansAnaPCA$totss
+kmeansAnaPCA$betweenss
+fviz_cluster(kmeansAnaPCA, data = dataNormPCA)
+kmeansAnaPCA$cluster
+conMatPCA <- table(dataNormPCA$quality, kmeansAnaPCA$cluster)
+print(conMatPCA)
+
+#Accuracy
+columnPCA <- factor(dataNormPCA$quality)
+qualityNum <- as.numeric(columnPCA)
+confusionMatrix(data=as.factor(c(as.factor(kmeansAnaPCA$cluster))), reference=as.factor(qualityNum))
+
