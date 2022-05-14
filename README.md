@@ -21,7 +21,7 @@ All of a wine's chemical qualities are continuous variables. Quality is an ordin
 ![Screenshot 2022-05-14 095209](https://user-images.githubusercontent.com/99184773/168410566-f434253e-51e8-41c8-822c-f5d1f89b55c5.png)
 
 ![Screenshot 2022-05-14 095312](https://user-images.githubusercontent.com/99184773/168410568-34dcfe5f-d24b-47e9-a763-0883d41e8840.png)
-## 🛠 Skills
+## 🛠 Tools
 R
 
 RStudio
